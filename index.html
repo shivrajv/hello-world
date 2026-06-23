@@ -19,11 +19,56 @@
     }
 
     h1 {
-      margin: 0.5rem 0 1.5rem;
+      margin: 0.5rem 0 1rem;
       text-align: center;
     }
 
-    /* Control panel at the top */
+    /* Sliding phrase carousel */
+    .carousel-wrap {
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 1.25rem;
+    }
+
+    .carousel-hint {
+      font-size: 0.8rem;
+      color: #777;
+      text-align: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .carousel {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      padding: 0.25rem 0.1rem 0.6rem;
+      scrollbar-width: thin;
+    }
+
+    .chip {
+      flex: 0 0 auto;
+      scroll-snap-align: center;
+      padding: 0.6rem 1.1rem;
+      border-radius: 999px;
+      border: 2px solid #ccc;
+      background: #fff;
+      color: #1a1a2e;
+      white-space: nowrap;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.15s ease;
+    }
+
+    .chip.selected {
+      border-color: #4361ee;
+      background: #eaf0ff;
+      color: #4361ee;
+      font-weight: 600;
+    }
+
+    /* Style controls */
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -95,6 +140,11 @@
 <body>
   <h1>Hello World App</h1>
 
+  <div class="carousel-wrap">
+    <div class="carousel-hint">Swipe and tap to pick a phrase</div>
+    <div class="carousel" id="carousel"></div>
+  </div>
+
   <div class="controls">
     <div class="control">
       <label for="colorSelect">Color</label>
@@ -141,6 +191,41 @@
     const colorSelect = document.getElementById("colorSelect");
     const fontSelect = document.getElementById("fontSelect");
     const sizeSelect = document.getElementById("sizeSelect");
+    const helloBtn = document.getElementById("helloBtn");
+    const carousel = document.getElementById("carousel");
+
+    // Pool of short phrases; up to 7 are shown (shuffled) on each page load
+    const PHRASE_POOL = [
+      "Hello World",
+      "Good Morning",
+      "Welcome",
+      "Thank You",
+      "Congratulations",
+      "Happy Birthday",
+      "Cheers",
+      "Well Done",
+      "Good Luck",
+      "Stay Awesome"
+    ];
+    const MAX_PHRASES = 7;
+
+    let selectedPhrase = "Hello World";
+
+    // Fisher-Yates shuffle, then take up to MAX_PHRASES
+    function pickPhrases() {
+      const pool = PHRASE_POOL.slice();
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, MAX_PHRASES);
+    }
+
+    // Always fully replace the output text so no previous text lingers
+    function setOutput(text) {
+      output.textContent = "";   // clear any existing text first
+      output.textContent = text; // then set the new value
+    }
 
     // Apply the current control selections to the output text
     function applyStyles() {
@@ -149,21 +234,46 @@
       output.style.fontSize = sizeSelect.value;
     }
 
+    // Make a phrase the active selection
+    function selectPhrase(phrase, chipEl) {
+      selectedPhrase = phrase;
+      helloBtn.textContent = phrase; // blue button shows the chosen phrase
+      setOutput("");                 // clear stale text from a previous phrase
+      carousel.querySelectorAll(".chip").forEach(c => c.classList.remove("selected"));
+      if (chipEl) chipEl.classList.add("selected");
+    }
+
+    // Build the carousel
+    function buildCarousel() {
+      const phrases = pickPhrases();
+      carousel.innerHTML = "";
+      phrases.forEach((phrase, idx) => {
+        const chip = document.createElement("button");
+        chip.className = "chip";
+        chip.type = "button";
+        chip.textContent = phrase;
+        chip.addEventListener("click", () => selectPhrase(phrase, chip));
+        carousel.appendChild(chip);
+        if (idx === 0) selectPhrase(phrase, chip); // default to first phrase
+      });
+    }
+
     // Live-update styling whenever a control changes
     colorSelect.addEventListener("change", applyStyles);
     fontSelect.addEventListener("change", applyStyles);
     sizeSelect.addEventListener("change", applyStyles);
 
-    document.getElementById("helloBtn").addEventListener("click", () => {
-      output.textContent = "Hello World";
+    helloBtn.addEventListener("click", () => {
+      setOutput(selectedPhrase);
       applyStyles();
     });
 
     document.getElementById("clearBtn").addEventListener("click", () => {
-      output.textContent = "";
+      setOutput("");
     });
 
-    // Set initial styles so the first click already looks right
+    // Initialize
+    buildCarousel();
     applyStyles();
   </script>
 </body>
