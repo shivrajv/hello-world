@@ -10,15 +10,50 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
       min-height: 100vh;
       margin: 0;
+      padding: 1.5rem 1rem;
+      box-sizing: border-box;
       background: #f4f6fb;
       color: #1a1a2e;
     }
 
     h1 {
+      margin: 0.5rem 0 1.5rem;
+      text-align: center;
+    }
+
+    /* Control panel at the top */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      width: 100%;
+      max-width: 420px;
       margin-bottom: 1.5rem;
+    }
+
+    .control {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 120px;
+    }
+
+    .control label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #555;
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      color: #1a1a2e;
     }
 
     .buttons {
@@ -50,15 +85,49 @@
     }
 
     #output {
-      font-size: 2rem;
       font-weight: 600;
-      min-height: 2.5rem;
-      color: #4361ee;
+      min-height: 3rem;
+      text-align: center;
+      word-break: break-word;
     }
   </style>
 </head>
 <body>
   <h1>Hello World App</h1>
+
+  <div class="controls">
+    <div class="control">
+      <label for="colorSelect">Color</label>
+      <select id="colorSelect">
+        <option value="#4361ee">Blue</option>
+        <option value="#e63946">Red</option>
+        <option value="#2a9d8f">Green</option>
+        <option value="#9d4edd">Purple</option>
+        <option value="#f77f00">Orange</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="fontSelect">Font</label>
+      <select id="fontSelect">
+        <option value="system-ui, -apple-system, Segoe UI, Roboto, sans-serif">Sans-serif</option>
+        <option value="Georgia, 'Times New Roman', serif">Serif</option>
+        <option value="'Courier New', monospace">Monospace</option>
+        <option value="'Brush Script MT', cursive">Cursive</option>
+        <option value="Impact, 'Arial Black', sans-serif">Bold Display</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label for="sizeSelect">Size</label>
+      <select id="sizeSelect">
+        <option value="1.5rem">Small</option>
+        <option value="2rem" selected>Medium</option>
+        <option value="3rem">Large</option>
+        <option value="4rem">X-Large</option>
+      </select>
+    </div>
+  </div>
 
   <div class="buttons">
     <button id="helloBtn">Hello World</button>
@@ -69,14 +138,33 @@
 
   <script>
     const output = document.getElementById("output");
+    const colorSelect = document.getElementById("colorSelect");
+    const fontSelect = document.getElementById("fontSelect");
+    const sizeSelect = document.getElementById("sizeSelect");
+
+    // Apply the current control selections to the output text
+    function applyStyles() {
+      output.style.color = colorSelect.value;
+      output.style.fontFamily = fontSelect.value;
+      output.style.fontSize = sizeSelect.value;
+    }
+
+    // Live-update styling whenever a control changes
+    colorSelect.addEventListener("change", applyStyles);
+    fontSelect.addEventListener("change", applyStyles);
+    sizeSelect.addEventListener("change", applyStyles);
 
     document.getElementById("helloBtn").addEventListener("click", () => {
       output.textContent = "Hello World";
+      applyStyles();
     });
 
     document.getElementById("clearBtn").addEventListener("click", () => {
       output.textContent = "";
     });
+
+    // Set initial styles so the first click already looks right
+    applyStyles();
   </script>
 </body>
 </html>
